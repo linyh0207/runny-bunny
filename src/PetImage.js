@@ -7,34 +7,50 @@ import {
 } from 'react-native';
 
 
-export function PetImage(props){
-    const hunger = props.hunger;
-    const imgSrcBase = '../images/red/256x256/';
-    let imgSrcFull;
-    if(hunger > 100){
-        imgSrcFull = imgSrcBase + 'kiss.png'
-    }else if (hunger > 80){
-        imgSrcFull = imgSrcBase + 'happy.png'
-    } else if (hunger > 60){
-        imgSrcFull = imgSrcBase + 'smile.png'
-    } else if (hunger > 40){
-        imgSrcFull = imgSrcBase + 'wary.png'
-    } else if (hunger > 20){
-        imgSrcFull = imgSrcBase + 'sad.png'
-    } else{
-        imgSrcFull = imgSrcBase + 'cry.png'
+export class PetImage extends React.Component{
+    constructor(props) {
+        super(props);
+      }
+
+    render(){
+        const hunger = this.props.hunger;
+        let imgKey = 0;
+        // Need this, since you can't dynamically load images
+        const imgRequireMap = {
+            10: require('../images/red/256x256/kiss.png'),
+            8: require('../images/red/256x256/happy.png'),
+            6: require('../images/red/256x256/smile.png'),
+            4: require('../images/red/256x256/wary.png'),
+            2: require('../images/red/256x256/sad.png'),
+            0: require('../images/red/256x256/cry.png')
+        };
+
+        if(hunger > 100){
+            imgKey = 10;
+        }else if (hunger > 80){
+            imgKey = 8;
+        } else if (hunger > 60){
+            imgKey = 6;
+        } else if (hunger > 40){
+            imgKey = 4;
+        } else if (hunger > 20){
+            imgKey = 2;
+        } else{
+            imgKey = 0;
+        }
+        console.log(imgRequireMap[imgKey]);
+        return (
+            <Image
+            style={{
+              alignSelf: 'center',
+              borderWidth: 1,
+              borderRadius: 50
+            }}
+            source={imgRequireMap[imgKey]}
+            resizeMode="stretch"
+          />
+        );
     }
-    console.log(imgSrcFull);
-    return (
-        <Image
-        style={{
-          alignSelf: 'center',
-          borderWidth: 1,
-          borderRadius: 50
-        }}
-        source={require('../images/red/256x256/cry.png')}
-        resizeMode="stretch"
-      />
-    );
+
 
 }

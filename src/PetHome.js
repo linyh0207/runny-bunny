@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-  Image,
-  LayoutAnimation,
   Modal,
   NativeModules,
   StyleSheet,
@@ -22,9 +20,6 @@ UIManager.setLayoutAnimationEnabledExperimental &&
 const FOOD_DECREMENT = 10;
 // Drops to 0 from a 100 after 3 days => (3600*3*24)x = 100
 const HUNGER_DECAY = 0.00038580;
-// Hunger is used to scale the size of the pet,
-// this is an offset so that at 0 hunger the width/height is not 0
-const HUNGER_SIZE_OFFSET = 100; 
 
 class PetHome extends React.Component {
   static navigationOptions = {
@@ -45,6 +40,7 @@ class PetHome extends React.Component {
     }
     this.onPress = this.onPress.bind(this);
     this.showModal = this.showModal.bind(this)
+    AsyncStorage.clear().then( () => console.log());
   }
 
   retrieveStoredData = async () => {
@@ -144,8 +140,6 @@ class PetHome extends React.Component {
   onPress = () => {
     // Feed the pet
     this.feed();
-    // Animate the update
-    LayoutAnimation.spring();
     this.setState(this.state)
   }
 
@@ -174,6 +168,7 @@ class PetHome extends React.Component {
             animationType="slide"
             transparent={false}
             visible={this.state.modalVisible}
+            onRequestClose={() => console.log('Modal closed')}
           >
             <View style={{
               flex: 1,
