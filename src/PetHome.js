@@ -19,7 +19,7 @@ UIManager.setLayoutAnimationEnabledExperimental &&
 
 class PetHome extends React.Component {
   static navigationOptions = {
-    title: 'Pet Home',
+    title: 'Pet Home 🏠',
   };
   constructor(props){
     super(props);
@@ -53,6 +53,7 @@ class PetHome extends React.Component {
     return (
       <View style={styles.container}>
         <Text>{ this.state.name }</Text>
+        
         <Image
           style={{
             alignSelf: 'center',
