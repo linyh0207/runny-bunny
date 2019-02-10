@@ -11,6 +11,7 @@ import {
 import { Bar } from './Bar';
 import {getData} from './fitbit/fitbit'
 import { PetImage } from './PetImage';
+import { within_bounds } from './utils';
 
 const FOOD_DECREMENT = 10;
 // Drops to 0 from a 100 after 3 days => (3600*3*24)x = 100
@@ -47,14 +48,6 @@ class PetHome extends React.Component {
       let lastOpenTime = await AsyncStorage.getItem('lastOpenTime');
       const name = await AsyncStorage.getItem('name');
       // yyyy-MM-ddTHH:mm:ss
-      if (hunger >= 100) {
-        hunger = 100
-        this.state.hunger = hunger
-      }
-      if (hunger < 0) {
-        hunger = 0
-        this.state.hunger = hunger
-      }
       if (lastSyncTime == null) {
         lastSyncTime = new Date().toISOString()
         this.state.lastSyncTime = lastSyncTime
@@ -70,7 +63,7 @@ class PetHome extends React.Component {
         lastSyncTime !== null &&
         lastOpenTime !== null) {
         const differenceInSeconds = (currentTime - lastOpenTime)/1000;
-        this.state.hunger = hunger - differenceInSeconds*HUNGER_DECAY;
+        this.state.hunger = within_bounds(hunger - differenceInSeconds*HUNGER_DECAY, 0, 100)
         this.state.lastSyncTime = lastSyncTime;
         this.state.lastOpenTime = lastOpenTime;
         this.state.food = food;
@@ -107,22 +100,17 @@ class PetHome extends React.Component {
   };
 
   componentDidMount(){
-    // TODO: Send API call to retrieve information from fitbit
     this.retrieveStoredData().then( () => {
       console.debug('Successful retrieval', this.state);
 
       AsyncStorage.getItem('@funnybunny:fitbit_access_token', (err, result) => {
         getData(result, this.state.lastSyncTime, (calories) => {
-          this.state.food += calories
-          if (this.state.food > 100)
-            this.state.food = 100
+          this.state.food += calories;
           this.state.lastSyncTime = new Date().toISOString()
         })
       });
-
       this.setState(this.state);
     });
-    
   }
   /**
    * Store the data right before navigation away from main page
@@ -132,28 +120,27 @@ class PetHome extends React.Component {
   }
 
   canFeed() {
-    return this.state.food > FOOD_DECREMENT && this.state.hunger <= 100 - FOOD_DECREMENT;
+    return this.state.food > 0 && this.state.hunger <= (100 - this.state.food);
   }
 
   feed() {
     if (this.canFeed()) {
-      this.state.hunger += FOOD_DECREMENT;
-      this.state.food -= FOOD_DECREMENT;
+      const decrement = Math.min(FOOD_DECREMENT, this.state.food);
+      this.state.hunger += decrement;
+      this.state.food -= decrement;
     } else {
       console.warn('Cannot feed! No food or he\'s full');
     }
-    console.log(this.state.food)
-    console.log(this.state.hunger)
   }
 
 
   componentDidUpdate() {
-    if (this.state.hunger < 0){
-      // TODO: Add dead state?
-    }
     if (!this.canFeed) {
       // TODO: Gray out the food button otherwise
     }
+    // Bounds Checking
+    this.state.food = within_bounds(this.state.food, 0, 100);
+    this.state.hunger = within_bounds(this.state.hunger, 0, 100);
   }
   /**
    * This is the feed buttom
@@ -166,25 +153,6 @@ class PetHome extends React.Component {
 
   showModal(visible) {
     this.setState({ modalVisible: visible });
-  }
-
-  componentDidMount(){
-    // TODO: Send API call to retrieve information from fitbit
-    this.retrieveStoredData().then( () => {
-      console.debug('Successful retrieval', this.state);
-
-      AsyncStorage.getItem('@funnybunny:fitbit_access_token', (err, result) => {
-        getData(result, this.state.lastSyncTime, (calories) => {
-          this.state.food += calories
-          if (this.state.food > 100)
-            this.state.food = 100
-          this.state.lastSyncTime = new Date().toISOString()
-        })
-      });
-
-      this.setState(this.state);
-    });
-
   }
 
   render() {
