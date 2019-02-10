@@ -53,7 +53,7 @@ class PetHome extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>This is Pet Home Page! { this.state.name }</Text>
+        <Text>{ this.state.name }</Text>
         <Image
           style={{
             alignSelf: 'center',
@@ -65,11 +65,13 @@ class PetHome extends React.Component {
           source={require('../images/bunny.png')}
           resizeMode="stretch"
         />  
+
           <TouchableOpacity onPress={this.onPress}>
             <View style={styles.button}>
               <Text style={styles.buttonText}>Feed me!</Text>
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity onPress={this.shrink}>
             <View style={styles.button}>
               <Text style={styles.buttonText}>Make me skinny😂</Text>
@@ -81,32 +83,30 @@ class PetHome extends React.Component {
               animationType="slide"
               transparent={false}
               visible={this.state.modalVisible}
-              >
-
+            >
             <View style={{
               flex: 1,
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center'}}
               >
-            <View style={{
-            width: 300,
-            height: 300}}>
-            <TextInput
-            style={styles.textBox} 
-            placeholder='Pet Name' 
-            onChangeText={(name) => this.setState({name})}
-            value={this.state.name}
-            />
-              
-              <TouchableOpacity
-                onPress={() => {
-                  this.showModal(!this.state.modalVisible);
-                }}>
-              <Text >Set Pet Name</Text>
-              
-              </TouchableOpacity>
-              </View>
+              <View style={{
+                width: 300,
+                height: 300}}
+                >
+                <TextInput
+                  style={styles.textBox} 
+                  placeholder='Pet Name' 
+                  onChangeText={(name) => this.setState({name})}
+                  value={this.state.name}
+                />
+                <TouchableOpacity
+                  onPress={() => {
+                    this.showModal(!this.state.modalVisible);
+                  }}>
+                  <Text >Set Pet Name</Text>
+                </TouchableOpacity>
+                </View>
               </View>
             </Modal>
           </View>
