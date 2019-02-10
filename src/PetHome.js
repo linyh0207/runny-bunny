@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Image,
   LayoutAnimation,
   NativeModules, 
   StyleSheet, 
@@ -28,14 +29,24 @@ class PetHome extends React.Component {
   onPress = () => {
     // Animate the update
     LayoutAnimation.spring();
-    this.setState({w: this.state.w + 15, h: this.state.h + 15})
+    this.setState({w: this.state.width + 15, h: this.state.height + 15})
   }
 
   render() {
     return (
       <View style={styles.container}>
         <Text>This is Pet Home Page!</Text>
-        <View style={[styles.box, {width: this.state.w, height: this.state.h}]} />
+        <Image
+          style={{
+            alignSelf: 'center',
+            height: 150,
+            width: 150,
+            borderWidth: 1,
+            borderRadius: 75
+          }}
+          source={require('../images/bunny.png')}
+          resizeMode="stretch"
+        />  
           <TouchableOpacity onPress={this.onPress}>
             <View style={styles.button}>
               <Text style={styles.buttonText}>Press me!</Text>
@@ -46,6 +57,8 @@ class PetHome extends React.Component {
   }
 }
 
+//<View style={[styles.box, {width: this.state.w, height: this.state.h}]} />
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -54,9 +67,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   box: {
-    width: 200,
-    height: 200,
-    backgroundColor: 'yellow'
+    width: 100,
+    height: 100,
   },
   button: {
     backgroundColor: 'black',
