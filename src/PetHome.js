@@ -61,12 +61,11 @@ class PetHome extends React.Component {
         food !== null && 
         lastSyncTime !== null &&
         lastOpenTime !== null) {
-        // TODO: Fix this code...
         const differenceInSeconds = (currentTime - lastOpenTime)/1000;
-        this.state.food = food - differenceInSeconds*HUNGER_DECAY;
+        this.state.hunger = hunger - differenceInSeconds*HUNGER_DECAY;
         this.state.lastSyncTime = lastSyncTime;
         this.state.lastOpenTime = lastOpenTime;
-        this.state.hunger = hunger;
+        this.state.food = food;
       }
       else {
         console.warn('Could not retrieve all stored data! Using defaults');
