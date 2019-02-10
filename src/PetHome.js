@@ -12,6 +12,7 @@ import {
   AsyncStorage
 } from 'react-native';
 import { Bar } from './Bar';
+import { PetImage } from './PetImage';
 
 const { UIManager } = NativeModules;
 
@@ -160,17 +161,7 @@ class PetHome extends React.Component {
       </View>
       <View style={styles.petContainer}>
         <Text>{this.state.name}</Text>
-        <Image
-          style={{
-            alignSelf: 'center',
-            height: this.state.hunger + HUNGER_SIZE_OFFSET,
-            width: this.state.hunger + HUNGER_SIZE_OFFSET,
-            borderWidth: 1,
-            borderRadius: 50
-          }}
-          source={require('../images/bunny.png')}
-          resizeMode="stretch"
-        />
+        <PetImage hunger={this.state.hunger}></PetImage>
 
         <TouchableOpacity onPress={this.onPress}>
           <View style={styles.button}>
