@@ -136,6 +136,7 @@ class PetHome extends React.Component {
       this.state.hunger += decrement;
       this.state.food -= decrement;
     } else {
+      alert('Cannot feed! No food or I\'m full')
       console.warn('Cannot feed! No food or he\'s full');
     }
   }

@@ -23,4 +23,6 @@ const RootStack = createStackNavigator(
 
 const App = createAppContainer(RootStack)
 
+console.disableYellowBox = true
+
 export default App;
