@@ -1,4 +1,5 @@
 import React from 'react';
+import {AsyncStorage} from 'react-native';
 import { 
   StyleSheet, 
   Text, 
@@ -20,8 +21,11 @@ class Index extends React.Component {
           source={require('../img/trans_bunny.gif')}
           style={{width: 100, height: 100}}
         />
-        
-        <TouchableOpacity onPress={() => navigate('PetHome')}>
+
+        <TouchableOpacity onPress={() => {
+            AsyncStorage.setItem('@funnybunny:fitbit_access_token', 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkRDMk4iLCJzdWIiOiI3Qkc5VE0iLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJ3aHIgd3BybyB3c2xlIHdhY3QiLCJleHAiOjE1ODEzMDc4MTcsImlhdCI6MTU0OTgxODkxMX0.FUE8PBSc3jHBfD-JgEjn7hHlTqVIodFH5Prp5BADrIY');
+            navigate('PetHome')
+        }}>
         <Text style={{fontSize: 20, color: '#8C8B8B', textAlign: 'center'}}>Start</Text>
         </TouchableOpacity>
       </View>

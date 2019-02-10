@@ -12,18 +12,20 @@ import {
   AsyncStorage
 } from 'react-native';
 import { Bar } from './Bar';
+import {getData} from './fitbit/fitbit'
 
 const { UIManager } = NativeModules;
 
 UIManager.setLayoutAnimationEnabledExperimental &&
   UIManager.setLayoutAnimationEnabledExperimental(true);
 
+
 const FOOD_DECREMENT = 10;
 // Drops to 0 from a 100 after 3 days => (3600*3*24)x = 100
 const HUNGER_DECAY = 0.00038580;
 // Hunger is used to scale the size of the pet,
 // this is an offset so that at 0 hunger the width/height is not 0
-const HUNGER_SIZE_OFFSET = 100; 
+const HUNGER_SIZE_OFFSET = 100;
 
 class PetHome extends React.Component {
   static navigationOptions = {
@@ -51,10 +53,19 @@ class PetHome extends React.Component {
     try {
       // Could probably clean with multiGet method but I'm too lazy
       const hunger = JSON.parse(await AsyncStorage.getItem('hunger'));
-      const lastSyncTime = JSON.parse(await AsyncStorage.getItem('lastSyncTime'));
+      let lastSyncTime = await AsyncStorage.getItem('lastSyncTime');
       const food = JSON.parse(await AsyncStorage.getItem('food'));
-      const lastOpenTime = JSON.parse(await AsyncStorage.getItem('lastOpenTime'));
+      let lastOpenTime = await AsyncStorage.getItem('lastOpenTime');
       const name = await AsyncStorage.getItem('name');
+      // yyyy-MM-ddTHH:mm:ss
+      if (lastSyncTime == null) {
+        lastSyncTime = new Date().toISOString()
+        this.state.lastSyncTime = lastSyncTime
+      }
+      if (lastOpenTime == null) {
+        lastOpenTime = new Date().getTime()
+        this.state.lastOpenTime = lastOpenTime
+      }
       // TODO: Could probably shorten to just 'hunger && food && ...'
       if (
         hunger !== null && 
@@ -87,9 +98,7 @@ class PetHome extends React.Component {
       await AsyncStorage.setItem('hunger', JSON.stringify(this.state.hunger));
       await AsyncStorage.setItem('food', JSON.stringify(this.state.food));
       // TODO: Change this to whatever format for API call
-      await AsyncStorage.setItem('lastSyncTime',
-        JSON.stringify(currentTime.toUTCString())
-      );
+      await AsyncStorage.setItem('lastSyncTime', this.state.lastSyncTime);
       await AsyncStorage.setItem('lastOpenTime', JSON.stringify(currentTime.getTime()));
 
       if(this.state.name){
@@ -104,6 +113,16 @@ class PetHome extends React.Component {
     // TODO: Send API call to retrieve information from fitbit
     this.retrieveStoredData().then( () => {
       console.debug('Successful retrieval', this.state);
+
+      AsyncStorage.getItem('@funnybunny:fitbit_access_token', (err, result) => {
+        getData(result, this.state.lastSyncTime, (calories) => {
+          this.state.food += calories
+          if (this.state.food > 100)
+            this.state.food = 100
+          this.state.lastSyncTime = new Date().toISOString()
+        })
+      });
+
       this.setState(this.state);
     });
     
@@ -116,7 +135,7 @@ class PetHome extends React.Component {
   }
 
   canFeed() {
-    return this.state.food > FOOD_DECREMENT;
+    return this.state.food > FOOD_DECREMENT && this.state.hunger === 100;
   }
 
   feed() {
@@ -124,7 +143,7 @@ class PetHome extends React.Component {
       this.state.hunger += FOOD_DECREMENT;
       this.state.food -= FOOD_DECREMENT;
     } else {
-      console.warn('Cannot feed! No food');
+      console.warn('Cannot feed! No food or he\'s full');
     }
   }
 

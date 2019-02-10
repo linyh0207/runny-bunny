@@ -4,6 +4,10 @@
     "slug": "runny-bunny",
     "privacy": "public",
     "sdkVersion": "32.0.0",
+    "scheme": "runnybunny",
+    "android": {
+      "package": "com.runnybunny.app"
+    },
     "platforms": [
       "ios",
       "android"
