@@ -2,18 +2,28 @@ import React from 'react';
 import { 
   StyleSheet, 
   Text, 
-  View 
+  View,
+  Image,
+  TouchableOpacity
 } from 'react-native';
 
 class Index extends React.Component {
-  static navigationOptions = {
-    title: 'Index'
-  };
-
   render() {
+    const { navigate } = this.props.navigation;
     return (
       <View style={styles.container}>
-        <Text>This is the index page! </Text>
+        <Image
+          source={require('../img/logo.png')}
+          style={{width: 450, height: 450}}
+        />
+        <Image
+          source={require('../img/trans_bunny.gif')}
+          style={{width: 100, height: 100}}
+        />
+        
+        <TouchableOpacity onPress={() => navigate('PetHome')}>
+        <Text style={{fontSize: 20, color: '#8C8B8B', textAlign: 'center'}}>Start</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -22,7 +32,7 @@ class Index extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
   },
