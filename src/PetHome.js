@@ -16,7 +16,7 @@ import { within_bounds } from './utils';
 
 const FOOD_DECREMENT = 10;
 // Drops to 0 from a 100 after 3 days => (3600*3*24)x = 100
-const HUNGER_DECAY = 2.0;
+const HUNGER_DECAY = .5;
 
 class PetHome extends React.Component {
   static navigationOptions = {
