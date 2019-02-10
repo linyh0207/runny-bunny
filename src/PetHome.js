@@ -6,7 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  AsyncStorage
+  AsyncStorage,
+  Image
 } from 'react-native';
 import { Bar } from './Bar';
 import {getData} from './fitbit/fitbit'
@@ -19,7 +20,13 @@ const HUNGER_DECAY = 2.0;
 
 class PetHome extends React.Component {
   static navigationOptions = {
-    title: 'Pet Home',
+    headerTitle: (
+      <Image
+        source={require('../img/home.png')}
+        style={{height: 30, width: 30}}
+      />
+    ),
+    headerTintColor: 'black'
   };
 
   constructor(props) {
