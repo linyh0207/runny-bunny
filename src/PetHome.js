@@ -1,9 +1,6 @@
 import React from 'react';
 import {
-  Image,
-  LayoutAnimation,
   Modal,
-  NativeModules,
   StyleSheet,
   Text,
   TextInput,
@@ -13,19 +10,11 @@ import {
 } from 'react-native';
 import { Bar } from './Bar';
 import {getData} from './fitbit/fitbit'
-
-const { UIManager } = NativeModules;
-
-UIManager.setLayoutAnimationEnabledExperimental &&
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-
+import { PetImage } from './PetImage';
 
 const FOOD_DECREMENT = 10;
 // Drops to 0 from a 100 after 3 days => (3600*3*24)x = 100
-const HUNGER_DECAY = 0.00038580;
-// Hunger is used to scale the size of the pet,
-// this is an offset so that at 0 hunger the width/height is not 0
-const HUNGER_SIZE_OFFSET = 100;
+const HUNGER_DECAY = 2.0;
 
 class PetHome extends React.Component {
   static navigationOptions = {
@@ -58,12 +47,20 @@ class PetHome extends React.Component {
     const currentTime = (new Date()).getTime();
     try {
       // Could probably clean with multiGet method but I'm too lazy
-      const hunger = JSON.parse(await AsyncStorage.getItem('hunger'));
+      let hunger = JSON.parse(await AsyncStorage.getItem('hunger'));
       let lastSyncTime = await AsyncStorage.getItem('lastSyncTime');
       const food = JSON.parse(await AsyncStorage.getItem('food'));
       let lastOpenTime = await AsyncStorage.getItem('lastOpenTime');
       const name = await AsyncStorage.getItem('name');
       // yyyy-MM-ddTHH:mm:ss
+      if (hunger >= 100) {
+        hunger = 100
+        this.state.hunger = hunger
+      }
+      if (hunger < 0) {
+        hunger = 0
+        this.state.hunger = hunger
+      }
       if (lastSyncTime == null) {
         lastSyncTime = new Date().toISOString()
         this.state.lastSyncTime = lastSyncTime
@@ -141,7 +138,7 @@ class PetHome extends React.Component {
   }
 
   canFeed() {
-    return this.state.food > FOOD_DECREMENT && this.state.hunger === 100;
+    return this.state.food > FOOD_DECREMENT && this.state.hunger <= 100 - FOOD_DECREMENT;
   }
 
   feed() {
@@ -151,6 +148,8 @@ class PetHome extends React.Component {
     } else {
       console.warn('Cannot feed! No food or he\'s full');
     }
+    console.log(this.state.food)
+    console.log(this.state.hunger)
   }
 
 
@@ -168,8 +167,6 @@ class PetHome extends React.Component {
   onPress = () => {
     // Feed the pet
     this.feed();
-    // Animate the update
-    LayoutAnimation.spring();
     this.setState(this.state)
   }
 
@@ -177,19 +174,23 @@ class PetHome extends React.Component {
     this.setState({ modalVisible: visible });
   }
 
-  componentDidMount = () => {
-      fetch(
-          'https://warm-stream-84299.herokuapp.com/activities',
-          {
-              method: 'GET',
-          }
-      ).then((res) => {
-          return res.json()
-      }).then((res) => {
-          console.log(`res: ${JSON.stringify(res)}`);
-      }).catch((err) => {
-          console.error('Error: ', err);
+  componentDidMount(){
+    // TODO: Send API call to retrieve information from fitbit
+    this.retrieveStoredData().then( () => {
+      console.debug('Successful retrieval', this.state);
+
+      AsyncStorage.getItem('@funnybunny:fitbit_access_token', (err, result) => {
+        getData(result, this.state.lastSyncTime, (calories) => {
+          this.state.food += calories
+          if (this.state.food > 100)
+            this.state.food = 100
+          this.state.lastSyncTime = new Date().toISOString()
+        })
       });
+
+      this.setState(this.state);
+    });
+
   }
 
   render() {
@@ -200,17 +201,7 @@ class PetHome extends React.Component {
       </View>
       <View style={styles.petContainer}>
         <Text>{this.state.name}</Text>
-        <Image
-          style={{
-            alignSelf: 'center',
-            height: this.state.hunger + HUNGER_SIZE_OFFSET,
-            width: this.state.hunger + HUNGER_SIZE_OFFSET,
-            borderWidth: 1,
-            borderRadius: 50
-          }}
-          source={require('../images/bunny.png')}
-          resizeMode="stretch"
-        />
+        <PetImage hunger={this.state.hunger}></PetImage>
 
         <TouchableOpacity onPress={this.onPress}>
           <View style={styles.button}>
@@ -223,6 +214,7 @@ class PetHome extends React.Component {
             animationType="slide"
             transparent={false}
             visible={this.state.modalVisible}
+            onRequestClose={() => console.log('Modal closed')}
           >
             <View style={{
               flex: 1,
