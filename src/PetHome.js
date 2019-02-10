@@ -19,7 +19,11 @@ UIManager.setLayoutAnimationEnabledExperimental &&
   UIManager.setLayoutAnimationEnabledExperimental(true);
 
 const FOOD_DECREMENT = 10;
-const HUNGER_DECAY = 0.01;
+// Drops to 0 from a 100 after 3 days => (3600*3*24)x = 100
+const HUNGER_DECAY = 0.00038580;
+// Hunger is used to scale the size of the pet,
+// this is an offset so that at 0 hunger the width/height is not 0
+const HUNGER_SIZE_OFFSET = 100; 
 
 class PetHome extends React.Component {
   static navigationOptions = {
@@ -33,59 +37,84 @@ class PetHome extends React.Component {
       modalVisible: false,
       hunger: 50,
       food: 100,
-      lastUpdatedTime: '',
+      // Sync Time is for retrieval limit of API calls to fitbit
+      lastSyncTime: null,
+      // Open Time is for determining hunger decay
+      lastOpenTime: null
     }
     this.onPress = this.onPress.bind(this);
     this.showModal = this.showModal.bind(this)
   }
 
-  componentDidMount(){
-    // TODO: Send API call to retrieve information from fitbit
-    this.retrieveStoredData().then( () => {
-      console.debug('Successful retrieve', this.state);
-      this.setState(this.state);
-    });
-    
-  }
-
   retrieveStoredData = async () => {
-    const currentTime = new Date();
+    const currentTime = (new Date()).getTime();
     try {
+      // Could probably clean with multiGet method but I'm too lazy
       const hunger = JSON.parse(await AsyncStorage.getItem('hunger'));
-      const lastUpdatedTime = JSON.parse(await AsyncStorage.getItem('lastUpdatedTime'));
+      const lastSyncTime = JSON.parse(await AsyncStorage.getItem('lastSyncTime'));
       const food = JSON.parse(await AsyncStorage.getItem('food'));
-
-      if (hunger !== null && food !== null && lastUpdatedTime !== null) {
+      const lastOpenTime = JSON.parse(await AsyncStorage.getItem('lastOpenTime'));
+      const name = await AsyncStorage.getItem('name');
+      // TODO: Could probably shorten to just 'hunger && food && ...'
+      if (
+        hunger !== null && 
+        food !== null && 
+        lastSyncTime !== null &&
+        lastOpenTime !== null) {
         // TODO: Fix this code...
-        this.state.lastUpdatedTime = lastUpdatedTime;
-        const parsedDate = Date.parse(lastUpdatedTime);
-        console.log(typeof parsedDate);
-        console.log('difference', (currentTime.getTime() - parsedDate)/1000 );
-        
+        const differenceInSeconds = (currentTime - lastOpenTime)/1000;
+        this.state.food = food - differenceInSeconds*HUNGER_DECAY;
+        this.state.lastSyncTime = lastSyncTime;
+        this.state.lastOpenTime = lastOpenTime;
         this.state.hunger = hunger;
-        this.state.food = food;
       }
       else {
         console.warn('Could not retrieve all stored data! Using defaults');
       }
+
+      if (name !== null){
+        this.state.name = name;
+      }
+
     } catch (error) {
       console.error(error);
     }
   };
 
   storeData = async () => {
-    console.log('store:', this.state);
     const currentTime = new Date();
     try {
+      // TODO: Maybe I should be storing the entire state object as JSON?
       await AsyncStorage.setItem('hunger', JSON.stringify(this.state.hunger));
       await AsyncStorage.setItem('food', JSON.stringify(this.state.food));
-      await AsyncStorage.setItem('lastUpdatedTime',
+      // TODO: Change this to whatever format for API call
+      await AsyncStorage.setItem('lastSyncTime',
         JSON.stringify(currentTime.toUTCString())
       );
+      await AsyncStorage.setItem('lastOpenTime', JSON.stringify(currentTime.getTime()));
+
+      if(this.state.name){
+        await AsyncStorage.setItem('name', this.state.name);
+      }
     } catch (error) {
       console.error(error);
     }
   };
+
+  componentDidMount(){
+    // TODO: Send API call to retrieve information from fitbit
+    this.retrieveStoredData().then( () => {
+      console.debug('Successful retrieval', this.state);
+      this.setState(this.state);
+    });
+    
+  }
+  /**
+   * Store the data right before navigation away from main page
+   */
+  componentWillUnmount(){
+    this.storeData().then(() => console.debug('Successful store', this.state));
+  }
 
   canFeed() {
     return this.state.food > FOOD_DECREMENT;
@@ -95,7 +124,6 @@ class PetHome extends React.Component {
     if (this.canFeed()) {
       this.state.hunger += FOOD_DECREMENT;
       this.state.food -= FOOD_DECREMENT;
-      this.storeData().then(() => console.debug('Successful store'));
     } else {
       console.warn('Cannot feed! No food');
     }
@@ -103,6 +131,9 @@ class PetHome extends React.Component {
 
 
   componentDidUpdate() {
+    if (this.state.hunger < 0){
+      // TODO: Add dead state?
+    }
     if (!this.canFeed) {
       // TODO: Gray out the food button otherwise
     }
@@ -131,8 +162,8 @@ class PetHome extends React.Component {
         <Image
           style={{
             alignSelf: 'center',
-            height: this.state.hunger,
-            width: this.state.hunger,
+            height: this.state.hunger + HUNGER_SIZE_OFFSET,
+            width: this.state.hunger + HUNGER_SIZE_OFFSET,
             borderWidth: 1,
             borderRadius: 50
           }}
@@ -162,8 +193,7 @@ class PetHome extends React.Component {
               <View style={{
                 width: 300,
                 height: 300
-              }}
-              >
+              }}>
                 <TextInput
                   style={styles.textBox}
                   placeholder='Pet Name'
@@ -181,18 +211,21 @@ class PetHome extends React.Component {
           </Modal>
         </View>
 
-        <TouchableOpacity
+        {/* No need to set name if already has a name? */}
+        {!this.state.name ? (
+          <TouchableOpacity
           onPress={() => {
             this.showModal(true);
           }}>
           <Text>Name Me!</Text>
         </TouchableOpacity>
+        ) : null}
+
       </View>
     );
   }
 }
 
-//<View style={[styles.box, {width: this.state.w, height: this.state.h}]} />
 
 const styles = StyleSheet.create({
   container: {
@@ -200,10 +233,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  box: {
-    width: 100,
-    height: 100,
   },
   button: {
     backgroundColor: 'black',
