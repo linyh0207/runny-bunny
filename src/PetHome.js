@@ -3,100 +3,171 @@ import {
   Image,
   LayoutAnimation,
   Modal,
-  NativeModules, 
-  StyleSheet, 
+  NativeModules,
+  StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity, 
-  View 
+  TouchableOpacity,
+  View,
+  AsyncStorage
 } from 'react-native';
+import { Bar } from './Bar';
 
-const { UIManager} = NativeModules;
+const { UIManager } = NativeModules;
 
 UIManager.setLayoutAnimationEnabledExperimental &&
   UIManager.setLayoutAnimationEnabledExperimental(true);
 
+const FOOD_DECREMENT = 10;
+const HUNGER_DECAY = 0.01;
 
 class PetHome extends React.Component {
   static navigationOptions = {
     title: 'Pet Home',
   };
-  constructor(props){
+
+  constructor(props) {
     super(props);
     this.state = {
-      w: 100,
-      h: 100,
       name: '',
       modalVisible: false,
+      hunger: 50,
+      food: 100,
+      lastUpdatedTime: '',
     }
     this.onPress = this.onPress.bind(this);
-    this.shrink = this.shrink.bind(this);
     this.showModal = this.showModal.bind(this)
   }
-  
+
+  componentDidMount(){
+    // TODO: Send API call to retrieve information from fitbit
+    this.retrieveStoredData().then( () => {
+      console.debug('Successful retrieve', this.state);
+      this.setState(this.state);
+    });
+    
+  }
+
+  retrieveStoredData = async () => {
+    const currentTime = new Date();
+    try {
+      const hunger = JSON.parse(await AsyncStorage.getItem('hunger'));
+      const lastUpdatedTime = JSON.parse(await AsyncStorage.getItem('lastUpdatedTime'));
+      const food = JSON.parse(await AsyncStorage.getItem('food'));
+
+      if (hunger !== null && food !== null && lastUpdatedTime !== null) {
+        // TODO: Fix this code...
+        this.state.lastUpdatedTime = lastUpdatedTime;
+        const parsedDate = Date.parse(lastUpdatedTime);
+        console.log(typeof parsedDate);
+        console.log('difference', (currentTime.getTime() - parsedDate)/1000 );
+        
+        this.state.hunger = hunger;
+        this.state.food = food;
+      }
+      else {
+        console.warn('Could not retrieve all stored data! Using defaults');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  storeData = async () => {
+    console.log('store:', this.state);
+    const currentTime = new Date();
+    try {
+      await AsyncStorage.setItem('hunger', JSON.stringify(this.state.hunger));
+      await AsyncStorage.setItem('food', JSON.stringify(this.state.food));
+      await AsyncStorage.setItem('lastUpdatedTime',
+        JSON.stringify(currentTime.toUTCString())
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  canFeed() {
+    return this.state.food > FOOD_DECREMENT;
+  }
+
+  feed() {
+    if (this.canFeed()) {
+      this.state.hunger += FOOD_DECREMENT;
+      this.state.food -= FOOD_DECREMENT;
+      this.storeData().then(() => console.debug('Successful store'));
+    } else {
+      console.warn('Cannot feed! No food');
+    }
+  }
+
+
+  componentDidUpdate() {
+    if (!this.canFeed) {
+      // TODO: Gray out the food button otherwise
+    }
+  }
+  /**
+   * This is the feed buttom
+   */
   onPress = () => {
+    // Feed the pet
+    this.feed();
     // Animate the update
     LayoutAnimation.spring();
-    this.setState({w: this.state.w + 15, h: this.state.h + 15})
-  }
-  
-  shrink = () => {
-    LayoutAnimation.spring();
-    this.setState({w: this.state.w - 15, h: this.state.h - 15})
+    this.setState(this.state)
   }
 
   showModal(visible) {
-    this.setState({modalVisible: visible});
+    this.setState({ modalVisible: visible });
   }
 
   render() {
+    // TODO: How do I add hunger and food bars to the left and right of the pet
+    /* <Bar height={this.state.hunger} colour="red"></Bar> */
     return (
       <View style={styles.container}>
-        <Text>{ this.state.name }</Text>
+        <Text>{this.state.name}</Text>
         <Image
           style={{
             alignSelf: 'center',
-            height: this.state.h,
-            width: this.state.w,
+            height: this.state.hunger,
+            width: this.state.hunger,
             borderWidth: 1,
             borderRadius: 50
           }}
           source={require('../images/bunny.png')}
           resizeMode="stretch"
-        />  
+        />
 
-          <TouchableOpacity onPress={this.onPress}>
-            <View style={styles.button}>
-              <Text style={styles.buttonText}>Feed me!</Text>
-            </View>
-          </TouchableOpacity>
+        <TouchableOpacity onPress={this.onPress}>
+          <View style={styles.button}>
+            <Text style={styles.buttonText}>Feed me!</Text>
+          </View>
+        </TouchableOpacity>
 
-          <TouchableOpacity onPress={this.shrink}>
-            <View style={styles.button}>
-              <Text style={styles.buttonText}>Make me skinny😂</Text>
-            </View>
-          </TouchableOpacity>
-  
-          <View style={styles.modal}>
-            <Modal
-              animationType="slide"
-              transparent={false}
-              visible={this.state.modalVisible}
-            >
+        <View style={styles.modal}>
+          <Modal
+            animationType="slide"
+            transparent={false}
+            visible={this.state.modalVisible}
+          >
             <View style={{
               flex: 1,
               flexDirection: 'column',
               justifyContent: 'center',
-              alignItems: 'center'}}
-              >
+              alignItems: 'center'
+            }}
+            >
               <View style={{
                 width: 300,
-                height: 300}}
-                >
+                height: 300
+              }}
+              >
                 <TextInput
-                  style={styles.textBox} 
-                  placeholder='Pet Name' 
-                  onChangeText={(name) => this.setState({name})}
+                  style={styles.textBox}
+                  placeholder='Pet Name'
+                  onChangeText={(name) => this.setState({ name })}
                   value={this.state.name}
                 />
                 <TouchableOpacity
@@ -105,18 +176,18 @@ class PetHome extends React.Component {
                   }}>
                   <Text >Set Pet Name</Text>
                 </TouchableOpacity>
-                </View>
               </View>
-            </Modal>
-          </View>
+            </View>
+          </Modal>
+        </View>
 
-          <TouchableOpacity
-            onPress={() => {
-              this.showModal(true);
-            }}>
-            <Text>Name Me!</Text>
-          </TouchableOpacity>
-      </View>            
+        <TouchableOpacity
+          onPress={() => {
+            this.showModal(true);
+          }}>
+          <Text>Name Me!</Text>
+        </TouchableOpacity>
+      </View>
     );
   }
 }
@@ -145,16 +216,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   modal: {
-    marginTop: 100, 
-    padding: 20, 
-    width: 300, 
-    backgroundColor: 'rgba(255,255,255,0)', 
+    marginTop: 100,
+    padding: 20,
+    width: 300,
+    backgroundColor: 'rgba(255,255,255,0)',
     justifyContent: 'center',
   },
   textBox: {
-    height: 40, 
-    borderColor: '#8C8B8B', 
-    borderWidth: 1, 
+    height: 40,
+    borderColor: '#8C8B8B',
+    borderWidth: 1,
     textAlign: 'center',
     marginTop: 10,
     color: '#8C8B8B',
