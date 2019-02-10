@@ -211,7 +211,8 @@ class PetHome extends React.Component {
           </Modal>
         </View>
 
-        {/* No need to set name if already has a name? */}
+        {/* No need to set name if already has a name. Using a ternary if operater here */}
+        {/* https://www.robinwieruch.de/conditional-rendering-react/#ternary-operation */}
         {!this.state.name ? (
           <TouchableOpacity
           onPress={() => {
