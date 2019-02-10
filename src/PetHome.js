@@ -1,9 +1,6 @@
 import React from 'react';
 import {
-  Image,
-  LayoutAnimation,
   Modal,
-  NativeModules,
   StyleSheet,
   Text,
   TextInput,
@@ -13,19 +10,11 @@ import {
 } from 'react-native';
 import { Bar } from './Bar';
 import {getData} from './fitbit/fitbit'
-
-const { UIManager } = NativeModules;
-
-UIManager.setLayoutAnimationEnabledExperimental &&
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-
+import { PetImage } from './PetImage';
 
 const FOOD_DECREMENT = 10;
 // Drops to 0 from a 100 after 3 days => (3600*3*24)x = 100
 const HUNGER_DECAY = 2.0;
-// Hunger is used to scale the size of the pet,
-// this is an offset so that at 0 hunger the width/height is not 0
-const HUNGER_SIZE_OFFSET = 100;
 
 class PetHome extends React.Component {
   static navigationOptions = {
@@ -172,8 +161,6 @@ class PetHome extends React.Component {
   onPress = () => {
     // Feed the pet
     this.feed();
-    // Animate the update
-    LayoutAnimation.spring();
     this.setState(this.state)
   }
 
@@ -208,17 +195,7 @@ class PetHome extends React.Component {
       </View>
       <View style={styles.petContainer}>
         <Text>{this.state.name}</Text>
-        <Image
-          style={{
-            alignSelf: 'center',
-            height: this.state.hunger + HUNGER_SIZE_OFFSET,
-            width: this.state.hunger + HUNGER_SIZE_OFFSET,
-            borderWidth: 1,
-            borderRadius: 50
-          }}
-          source={require('../images/bunny.png')}
-          resizeMode="stretch"
-        />
+        <PetImage hunger={this.state.hunger}></PetImage>
 
         <TouchableOpacity onPress={this.onPress}>
           <View style={styles.button}>
@@ -231,6 +208,7 @@ class PetHome extends React.Component {
             animationType="slide"
             transparent={false}
             visible={this.state.modalVisible}
+            onRequestClose={() => console.log('Modal closed')}
           >
             <View style={{
               flex: 1,
