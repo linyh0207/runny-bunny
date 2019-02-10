@@ -136,6 +136,7 @@ class PetHome extends React.Component {
       this.state.hunger += decrement;
       this.state.food -= decrement;
     } else {
+      alert('Cannot feed! No food or I\'m full')
       console.warn('Cannot feed! No food or he\'s full');
     }
   }
@@ -167,6 +168,10 @@ class PetHome extends React.Component {
     <View style={styles.container}>
       <View style={styles.hungerBar}>
         <Bar height={this.state.hunger} colour="red"></Bar>
+        <Image
+            source={require('../img/heart.png')}
+            style={{width: 20, height: 20}}
+          />
       </View>
       <View style={styles.petContainer}>
         {/* No need to set name if already has a name. Using a ternary if operater here */}
@@ -176,11 +181,7 @@ class PetHome extends React.Component {
             onPress={() => {
               this.showModal(true);
             }}>
-              <Image
-                source={require('../img/pencil.png')}
-                style={{width: 20, height: 20}}
-              />
-              <Text>Give me a name</Text>
+              <Text style={{ color: '#8C8B8B',fontWeight: 'bold',}}>Give me a name ... </Text>
             </TouchableOpacity>
           ) : null}
         <Text>{this.state.name}</Text>
@@ -208,7 +209,7 @@ class PetHome extends React.Component {
             >
               <View style={{
                 width: 300,
-                height: 300
+                height: 300,
               }}>
                 <TextInput
                   style={styles.textBox}
@@ -220,7 +221,7 @@ class PetHome extends React.Component {
                   onPress={() => {
                     this.showModal(!this.state.modalVisible);
                   }}>
-                  <Text >Set Pet Name</Text>
+                  <Text style={{ color: '#8C8B8B',fontWeight: 'bold',}}>Set Pet Name</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -229,6 +230,10 @@ class PetHome extends React.Component {
       </View>
       <View style={styles.foodBar}>
         <Bar height={this.state.food} colour="green"></Bar>
+        <Image
+            source={require('../img/carrot-icon.png')}
+            style={{width: 20, height: 20}}
+          />
       </View>
     </View>
     );
