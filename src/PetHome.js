@@ -6,7 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  AsyncStorage
+  AsyncStorage,
+  Image
 } from 'react-native';
 import { Bar } from './Bar';
 import {getData} from './fitbit/fitbit'
