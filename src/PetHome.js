@@ -22,7 +22,7 @@ UIManager.setLayoutAnimationEnabledExperimental &&
 
 const FOOD_DECREMENT = 10;
 // Drops to 0 from a 100 after 3 days => (3600*3*24)x = 100
-const HUNGER_DECAY = 0.5;
+const HUNGER_DECAY = 2.0;
 // Hunger is used to scale the size of the pet,
 // this is an offset so that at 0 hunger the width/height is not 0
 const HUNGER_SIZE_OFFSET = 100;
@@ -60,6 +60,10 @@ class PetHome extends React.Component {
       // yyyy-MM-ddTHH:mm:ss
       if (hunger >= 100) {
         hunger = 100
+        this.state.hunger = hunger
+      }
+      if (hunger < 0) {
+        hunger = 0
         this.state.hunger = hunger
       }
       if (lastSyncTime == null) {
@@ -177,19 +181,23 @@ class PetHome extends React.Component {
     this.setState({ modalVisible: visible });
   }
 
-  componentDidMount = () => {
-      fetch(
-          'https://warm-stream-84299.herokuapp.com/activities',
-          {
-              method: 'GET',
-          }
-      ).then((res) => {
-          return res.json()
-      }).then((res) => {
-          console.log(`res: ${JSON.stringify(res)}`);
-      }).catch((err) => {
-          console.error('Error: ', err);
+  componentDidMount(){
+    // TODO: Send API call to retrieve information from fitbit
+    this.retrieveStoredData().then( () => {
+      console.debug('Successful retrieval', this.state);
+
+      AsyncStorage.getItem('@funnybunny:fitbit_access_token', (err, result) => {
+        getData(result, this.state.lastSyncTime, (calories) => {
+          this.state.food += calories
+          if (this.state.food > 100)
+            this.state.food = 100
+          this.state.lastSyncTime = new Date().toISOString()
+        })
       });
+
+      this.setState(this.state);
+    });
+
   }
 
   render() {
