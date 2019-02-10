@@ -154,10 +154,12 @@ class PetHome extends React.Component {
   }
 
   render() {
-    // TODO: How do I add hunger and food bars to the left and right of the pet
-    /* <Bar height={this.state.hunger} colour="red"></Bar> */
     return (
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <View style={styles.hungerBar}>
+        <Bar height={this.state.hunger} colour="red"></Bar>
+      </View>
+      <View style={styles.petContainer}>
         <Text>{this.state.name}</Text>
         <Image
           style={{
@@ -223,17 +225,38 @@ class PetHome extends React.Component {
         ) : null}
 
       </View>
+      <View style={styles.foodBar}>
+        <Bar height={this.state.food} colour="green"></Bar>
+      </View>
+    </View>
     );
   }
 }
 
 
 const styles = StyleSheet.create({
-  container: {
+  container:{
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  hungerBar:{
+    marginLeft: 20,
+    marginTop:'auto',
+    marginBottom: 300,
+  },
+  foodBar: {
+    marginRight: 20,
+    marginTop:'auto',
+    marginBottom: 300,
+  },
+  petContainer: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    flexGrow: 1,
   },
   button: {
     backgroundColor: 'black',
