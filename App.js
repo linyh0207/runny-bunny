@@ -13,7 +13,7 @@ const RootStack = createStackNavigator(
     }
   },
   {
-    initialRouteName: 'PetHome',
+    initialRouteName: 'Index',
     },
 );
 
