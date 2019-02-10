@@ -54,7 +54,7 @@ class Index extends React.Component {
                   <View style={styles.button}>
                     <TouchableOpacity
                       onPress={() => {
-                        AsyncStorage.setItem('@funnybunny:fitbit_access_token', 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkRDMk4iLCJzdWIiOiI3Qkc5VE0iLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJ3aHIgd3BybyB3c2xlIHdhY3QiLCJleHAiOjE1ODEzMDc4MTcsImlhdCI6MTU0OTgxODkxMX0.FUE8PBSc3jHBfD-JgEjn7hHlTqVIodFH5Prp5BADrIY');
+                        AsyncStorage.setItem('@funnybunny:fitbit_access_token', 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkRDMk4iLCJzdWIiOiI3Qkc5VE0iLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJ3aHIgd3BybyB3c2xlIHdhY3QiLCJleHAiOjE1ODEzMDc4MTcsImlhdCI6MTU0OTgxODkxMX0.FUE8PBSc3jHBfD-JgEjn7hHlTqVIodFH5Prp5BADrIY').then(() => console.debug('Set Access Token'))
                         this.setLoginModalVisible(!this.state.loginModalVisible),
                         navigate('PetHome')}}>
                       <Text style={{fontSize: 20, color: '#8C8B8B', textAlign: 'center', marginTop: 5}}>Login</Text>
