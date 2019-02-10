@@ -113,10 +113,10 @@ class PetHome extends React.Component {
       AsyncStorage.getItem('@funnybunny:fitbit_access_token', (err, result) => {
         getData(result, this.state.lastSyncTime, (calories) => {
           this.state.food += calories;
-          this.state.lastSyncTime = new Date().toISOString()
+          this.state.lastSyncTime = new Date().toISOString();
+          this.setState(this.state);
         })
       });
-      this.setState(this.state);
     });
   }
   /**

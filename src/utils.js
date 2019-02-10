@@ -1,3 +1,9 @@
 export function within_bounds(value, low, high){
-    return Math.max(Math.min(value, high), low);
+    if(value < low){
+        return low;
+    } else if (value > high){
+        return high;
+    } else {
+        return value;
+    }
 }
