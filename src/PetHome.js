@@ -41,6 +41,7 @@ class PetHome extends React.Component {
       // Open Time is for determining hunger decay
       lastOpenTime: null
     }
+    // AsyncStorage.clear().then(()=>console.log(''))
     this.onPress = this.onPress.bind(this);
     this.showModal = this.showModal.bind(this)
   }
@@ -127,7 +128,8 @@ class PetHome extends React.Component {
   }
 
   canFeed() {
-    return this.state.food > 0 && this.state.hunger <= (100 - this.state.food);
+    const decrement = Math.min(FOOD_DECREMENT, this.state.food);
+    return this.state.food > 0 && this.state.hunger <= (100 - decrement);
   }
 
   feed() {
@@ -137,7 +139,7 @@ class PetHome extends React.Component {
       this.state.food -= decrement;
     } else {
       alert('Cannot feed! No food or I\'m full')
-      console.warn('Cannot feed! No food or he\'s full');
+      // console.warn('Cannot feed! No food or he\'s full');
     }
   }
 
