@@ -40,8 +40,8 @@ export class PetImage extends React.Component{
             <Image
             style={{
               alignSelf: 'center',
-              borderWidth: 1,
-              borderRadius: 50
+              marginTop: 50,
+              marginBottom: 50,
             }}
             source={imgRequireMap[imgKey]}
             resizeMode="stretch"

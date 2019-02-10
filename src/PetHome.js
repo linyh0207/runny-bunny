@@ -201,6 +201,20 @@ class PetHome extends React.Component {
         <Bar height={this.state.hunger} colour="red"></Bar>
       </View>
       <View style={styles.petContainer}>
+        {/* No need to set name if already has a name. Using a ternary if operater here */}
+        {/* https://www.robinwieruch.de/conditional-rendering-react/#ternary-operation */}
+        {!this.state.name ? (
+            <TouchableOpacity
+            onPress={() => {
+              this.showModal(true);
+            }}>
+              <Image
+                source={require('../img/pencil.png')}
+                style={{width: 20, height: 20}}
+              />
+              <Text>Give me a name</Text>
+            </TouchableOpacity>
+          ) : null}
         <Text>{this.state.name}</Text>
         <PetImage hunger={this.state.hunger}></PetImage>
 
@@ -244,18 +258,6 @@ class PetHome extends React.Component {
             </View>
           </Modal>
         </View>
-
-        {/* No need to set name if already has a name. Using a ternary if operater here */}
-        {/* https://www.robinwieruch.de/conditional-rendering-react/#ternary-operation */}
-        {!this.state.name ? (
-          <TouchableOpacity
-          onPress={() => {
-            this.showModal(true);
-          }}>
-          <Text>Name Me!</Text>
-        </TouchableOpacity>
-        ) : null}
-
       </View>
       <View style={styles.foodBar}>
         <Bar height={this.state.food} colour="green"></Bar>
@@ -315,8 +317,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: '#8C8B8B',
     fontSize: 20,
-
-  }
+  },
 });
 
 export default PetHome;
