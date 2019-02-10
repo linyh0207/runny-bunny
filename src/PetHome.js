@@ -31,6 +31,7 @@ class PetHome extends React.Component {
 
   constructor(props) {
     super(props);
+    // AsyncStorage.clear().then(()=> console.log('clear'))
     this.state = {
       name: '',
       modalVisible: false,
@@ -127,7 +128,9 @@ class PetHome extends React.Component {
   }
 
   canFeed() {
-    return this.state.food > 0 && this.state.hunger <= (100 - this.state.food);
+    const decrement = Math.min(FOOD_DECREMENT, this.state.food);
+
+    return this.state.food > 0 && this.state.hunger <= (100 - decrement);
   }
 
   feed() {
@@ -184,7 +187,7 @@ class PetHome extends React.Component {
               <Text style={{ color: '#8C8B8B',fontWeight: 'bold',}}>Give me a name ... </Text>
             </TouchableOpacity>
           ) : null}
-        <Text>{this.state.name}</Text>
+        <Text style={{ color: '#8C8B8B',fontWeight: 'bold',fontSize: 20}}>{this.state.name}</Text>
         <PetImage hunger={this.state.hunger}></PetImage>
 
         <TouchableOpacity onPress={this.onPress}>
