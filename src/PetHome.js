@@ -22,7 +22,7 @@ UIManager.setLayoutAnimationEnabledExperimental &&
 
 const FOOD_DECREMENT = 10;
 // Drops to 0 from a 100 after 3 days => (3600*3*24)x = 100
-const HUNGER_DECAY = 0.00038580;
+const HUNGER_DECAY = 0.5;
 // Hunger is used to scale the size of the pet,
 // this is an offset so that at 0 hunger the width/height is not 0
 const HUNGER_SIZE_OFFSET = 100;
@@ -52,12 +52,16 @@ class PetHome extends React.Component {
     const currentTime = (new Date()).getTime();
     try {
       // Could probably clean with multiGet method but I'm too lazy
-      const hunger = JSON.parse(await AsyncStorage.getItem('hunger'));
+      let hunger = JSON.parse(await AsyncStorage.getItem('hunger'));
       let lastSyncTime = await AsyncStorage.getItem('lastSyncTime');
       const food = JSON.parse(await AsyncStorage.getItem('food'));
       let lastOpenTime = await AsyncStorage.getItem('lastOpenTime');
       const name = await AsyncStorage.getItem('name');
       // yyyy-MM-ddTHH:mm:ss
+      if (hunger >= 100) {
+        hunger = 100
+        this.state.hunger = hunger
+      }
       if (lastSyncTime == null) {
         lastSyncTime = new Date().toISOString()
         this.state.lastSyncTime = lastSyncTime
@@ -135,7 +139,7 @@ class PetHome extends React.Component {
   }
 
   canFeed() {
-    return this.state.food > FOOD_DECREMENT && this.state.hunger === 100;
+    return this.state.food > FOOD_DECREMENT && this.state.hunger <= 100 - FOOD_DECREMENT;
   }
 
   feed() {
@@ -145,6 +149,8 @@ class PetHome extends React.Component {
     } else {
       console.warn('Cannot feed! No food or he\'s full');
     }
+    console.log(this.state.food)
+    console.log(this.state.hunger)
   }
 
 
