@@ -49,6 +49,21 @@ class PetHome extends React.Component {
     this.setState({modalVisible: visible});
   }
 
+  componentDidMount = () => {
+      fetch(
+          'https://warm-stream-84299.herokuapp.com/activities',
+          {
+              method: 'GET',
+          }
+      ).then((res) => {
+          return res.json()
+      }).then((res) => {
+          console.log(`res: ${JSON.stringify(res)}`);
+      }).catch((err) => {
+          console.error('Error: ', err);
+      });
+  }
+
   render() {
     return (
       <View style={styles.container}>
